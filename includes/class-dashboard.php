@@ -953,15 +953,17 @@ class USH_Dashboard {
      */
     public function render_scan_history() {
         $scan_history = $this->get_scan_history();
-        
         if (empty($scan_history)) {
+            echo '<div class="notice notice-info"><p>' . __('No scan history found.', 'unified-site-health-dashboard') . '</p></div>';
             return;
         }
-        
         ?>
         <div class="ush-scan-history">
             <h2><?php _e('Scan History', 'unified-site-health-dashboard'); ?></h2>
-            <table class="ush-scan-history-table widefat fixed striped">
+            <div class="ush-scan-history-filters" style="margin-bottom:10px;">
+                <input type="text" id="ush-scan-history-date-filter" placeholder="<?php esc_attr_e('Filter by date', 'unified-site-health-dashboard'); ?>" autocomplete="off" />
+            </div>
+            <table id="ush-scan-history-table" class="ush-scan-history-table widefat fixed striped display">
                 <thead>
                     <tr>
                         <th><?php _e('Date & Time', 'unified-site-health-dashboard'); ?></th>
@@ -973,11 +975,12 @@ class USH_Dashboard {
                         <th><?php _e('Content', 'unified-site-health-dashboard'); ?></th>
                         <th><?php _e('Host Health', 'unified-site-health-dashboard'); ?></th>
                         <th><?php _e('Overall', 'unified-site-health-dashboard'); ?></th>
+                        <th><?php _e('Action', 'unified-site-health-dashboard'); ?></th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php foreach ($scan_history as $scan): ?>
-                        <tr>
+                        <tr data-scan-date="<?php echo esc_attr($scan['datetime']); ?>">
                             <td>
                                 <div class="ush-scan-datetime">
                                     <div class="ush-scan-date"><?php echo esc_html($scan['date']); ?></div>
@@ -998,10 +1001,12 @@ class USH_Dashboard {
                             <td><?php echo $this->render_score_badge($scan['content_decay']); ?></td>
                             <td><?php echo $this->render_score_badge($scan['host_health']); ?></td>
                             <td><?php echo $this->render_score_badge($scan['overall']); ?></td>
+                            <td><span class="dashicons dashicons-trash ush-delete-scan" title="<?php esc_attr_e('Delete', 'unified-site-health-dashboard'); ?>" data-id="<?php echo esc_attr($scan['id']); ?>"></span></td>
                         </tr>
                     <?php endforeach; ?>
                 </tbody>
             </table>
+            <p class="description"><?php _e('You can filter, search, and sort the scan history. Use the trash icon to remove a scan record.', 'unified-site-health-dashboard'); ?></p>
         </div>
         <?php
     }
@@ -1018,6 +1023,7 @@ class USH_Dashboard {
         $scans = $wpdb->get_results(
             "SELECT * FROM $table_name ORDER BY scan_date DESC"
         );
+   
         
         if (empty($scans)) {
             return array();
@@ -1033,6 +1039,7 @@ class USH_Dashboard {
             
             if (!isset($scan_groups[$scan_key])) {
                 $scan_groups[$scan_key] = array(
+                    'id' => $scan->id,
                     'timestamp' => $scan_timestamp,
                     'date' => date('M j, Y', $scan_timestamp),
                     'time' => date('g:i A', $scan_timestamp),
@@ -1049,6 +1056,7 @@ class USH_Dashboard {
             $score_count = 0;
             
             $entry = array(
+                'id' => $group['id'],
                 'date' => $group['date'],
                 'time' => $group['time'],
                 'datetime' => $group['date'] . ' at ' . $group['time'],

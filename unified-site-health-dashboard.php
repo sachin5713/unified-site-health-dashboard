@@ -89,6 +89,7 @@ class UnifiedSiteHealthDashboard {
         add_action('wp_ajax_ush_get_page_report', array($this, 'ajax_get_page_report'));
         add_action('wp_ajax_ush_get_section_issues', array($this, 'ajax_get_section_issues'));
         add_action('wp_ajax_ush_rescan_page', array($this, 'ajax_rescan_page'));
+        add_action('wp_ajax_ush_delete_scan_record', array($this, 'ajax_delete_scan_record'));
         
         // Add settings page
         add_action('admin_menu', array($this, 'add_settings_page'));
@@ -171,6 +172,26 @@ class UnifiedSiteHealthDashboard {
      * Enqueue admin scripts and styles
      */
     public function enqueue_admin_scripts($hook) {
+        // Enqueue DataTables only on scan history page
+        $is_scan_history = isset($_GET['page']) && $_GET['page'] === 'site-health-scan-history';
+        if ($is_scan_history) {
+            wp_enqueue_style('datatables', 'https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css', array(), '1.13.7');
+            wp_enqueue_style('ush-scan-history', USH_PLUGIN_URL . 'assets/css/scan-history.css', array('datatables'), USH_PLUGIN_VERSION);
+            wp_enqueue_style('jquery-ui-datepicker', 'https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css', array(), '1.13.2');
+            wp_enqueue_script('datatables', 'https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js', array('jquery'), '1.13.7', true);
+            wp_enqueue_script('jquery-ui-datepicker', 'https://code.jquery.com/ui/1.13.2/jquery-ui.min.js', array('jquery'), '1.13.2', true);
+            wp_enqueue_script('ush-scan-history', USH_PLUGIN_URL . 'assets/js/scan-history.js', array('jquery', 'datatables', 'jquery-ui-datepicker'), USH_PLUGIN_VERSION, true);
+            wp_localize_script('ush-scan-history', 'ush_scan_history', array(
+                'ajax_url' => admin_url('admin-ajax.php'),
+                'nonce' => wp_create_nonce('ush_scan_history_nonce'),
+                'confirm_delete' => __('Are you sure you want to delete this scan record?', 'unified-site-health-dashboard'),
+                'success_delete' => __('Scan record deleted.', 'unified-site-health-dashboard'),
+                'error_delete' => __('Could not delete scan record.', 'unified-site-health-dashboard'),
+                'filter_placeholder' => __('Search all columns...', 'unified-site-health-dashboard'),
+                'date_placeholder' => __('Filter by date', 'unified-site-health-dashboard'),
+            ));
+        }
+
         // Always enqueue for dashboard widget or any Unified Site Health plugin page
         $plugin_pages = array(
             'site-health-detailed-report',
@@ -181,9 +202,9 @@ class UnifiedSiteHealthDashboard {
         $is_plugin_page = isset($_GET['page']) && in_array($_GET['page'], $plugin_pages);
         if ($hook === 'index.php' || $is_plugin_page || in_array($hook, array(
             'toplevel_page_site-health-detailed-report',
-            'site-health-detailed-report_page_site-health-page-report',
-            'site-health-detailed-report_page_site-health-settings',
-            'site-health-detailed-report_page_site-health-scan-history'
+            'site-health-detailed-report_page-site-health-page-report',
+            'site-health-detailed-report_page-site-health-settings',
+            'site-health-detailed-report_page-site-health-scan-history'
         ))) {
             wp_enqueue_style(
                 'ush-admin-style',
@@ -269,6 +290,31 @@ class UnifiedSiteHealthDashboard {
             'score' => isset($results['data']['overall_score']) ? (int) $results['data']['overall_score'] : 0,
             'timestamp' => current_time('mysql')
         ));
+    }
+        /**
+     * AJAX handler: Delete scan record by datetime
+     */
+    public function ajax_delete_scan_record() {
+        check_ajax_referer('ush_scan_history_nonce', 'nonce');
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(['message' => __('Permission denied.', 'unified-site-health-dashboard')]);
+        }
+        $id = isset($_POST['id']) ? intval($_POST['id']) : 0;
+        $datetime = isset($_POST['datetime']) ? sanitize_text_field($_POST['datetime']) : '';
+        global $wpdb;
+        $table = $wpdb->prefix . 'ush_scan_results';
+        if ($id > 0) {
+            $deleted = $wpdb->delete($table, ['id' => $id]);
+        } elseif (!empty($datetime)) {
+            $deleted = $wpdb->delete($table, ['scan_date' => $datetime]);
+        } else {
+            wp_send_json_error(['message' => __('Missing scan id or date/time.', 'unified-site-health-dashboard')]);
+        }
+        if ($deleted) {
+            wp_send_json_success();
+        } else {
+            wp_send_json_error(['message' => __('Could not delete scan record.', 'unified-site-health-dashboard')]);
+        }
     }
 
     /**
