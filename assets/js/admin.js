@@ -74,23 +74,24 @@ jQuery(document).ready(function($) {
             $(this).closest('tr').addClass('is-active');
         });
 
-        // Issues modal open/close
-        $(document).on('click', '.ush-open-issues-modal', function(e){
-            e.preventDefault();
-            var section = $(this).data('section');
-            var pageUrl = $(this).data('page-url') || '';
-            var $modal = ensureModal();
-            $modal.addClass('open');
-            $modal.find('.ush-modal-content').html('<div class="ush-loader"><span class="spinner is-active" style="float:none"></span> ' + ush_ajax.strings.loading + '</div>');
-            $.post(ush_ajax.ajax_url, { action: 'ush_get_section_issues', nonce: ush_ajax.nonce, section: section, page_url: pageUrl }, function(res){
-                if (res && res.success) {
-                    $modal.find('.ush-modal-content').html(res.data.html);
-                } else {
-                    $modal.find('.ush-modal-content').html('<div class="notice notice-error"><p>' + (res && res.data && res.data.message ? res.data.message : ush_ajax.strings.error) + '</p></div>');
-                }
-            }).fail(function(){
-                $modal.find('.ush-modal-content').html('<div class="notice notice-error"><p>' + ush_ajax.strings.error + '</p></div>');
-            });
+        // Tile modal open/close
+        $(document).on('click keypress', '.ush-tile-modal-trigger', function(e){
+            if (e.type === 'click' || (e.type === 'keypress' && (e.which === 13 || e.which === 32))) {
+                e.preventDefault();
+                var section = $(this).data('section');
+                var $modal = ensureModal();
+                $modal.addClass('open');
+                $modal.find('.ush-modal-content').html('<div class="ush-loader"><span class="spinner is-active" style="float:none"></span> ' + ush_ajax.strings.loading + '</div>');
+                $.post(ush_ajax.ajax_url, { action: 'ush_get_section_issues', nonce: ush_ajax.nonce, section: section }, function(res){
+                    if (res && res.success) {
+                        $modal.find('.ush-modal-content').html(res.data.html);
+                    } else {
+                        $modal.find('.ush-modal-content').html('<div class="notice notice-error"><p>' + (res && res.data && res.data.message ? res.data.message : ush_ajax.strings.error) + '</p></div>');
+                    }
+                }).fail(function(){
+                    $modal.find('.ush-modal-content').html('<div class="notice notice-error"><p>' + ush_ajax.strings.error + '</p></div>');
+                });
+            }
         });
         $(document).on('click', '.ush-modal-close, .ush-modal-overlay', function(){
             $('#ush-issues-modal').removeClass('open');

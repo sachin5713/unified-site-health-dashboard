@@ -5,7 +5,7 @@
 .ush-dashboard,
 .ush-detailed-report,
 .ush-main-dashboard {
-    max-width: 1200px;
+    /* max-width: 100%; */
 }
 
 /* Main Dashboard Styles */
@@ -815,7 +815,7 @@
 
 /* Page-wise Report Styles */
 .ush-page-wise-report {
-    max-width: 1400px;
+    /* max-width: 1400px; */
 }
 
 .ush-page-report-layout {

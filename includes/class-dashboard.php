@@ -594,13 +594,11 @@ class USH_Dashboard {
         $ttfb = $data['data']['ttfb'] ?? array();
         
         ?>
-            <div class="ush-section ush-performance">
+            <div class="ush-section ush-performance ush-tile-modal-trigger" data-section="performance" tabindex="0" role="button" aria-pressed="false">
             <h2><?php _e('Performance', 'unified-site-health-dashboard'); ?></h2>
             <div class="ush-score-circle ush-score-<?php echo $this->get_score_class($score); ?>">
                 <span class="ush-score-value"><?php echo $score; ?>%</span>
             </div>
-            <p><a href="#" class="button button-secondary ush-open-issues-modal" data-section="performance"><?php _e('View issues', 'unified-site-health-dashboard'); ?></a></p>
-            
             <?php if (!empty($pagespeed)): ?>
                 <div class="ush-metrics">
                     <h3><?php _e('Core Web Vitals', 'unified-site-health-dashboard'); ?></h3>
@@ -684,14 +682,7 @@ class USH_Dashboard {
             );
         }
         
-        if (!empty($issues)) {
-            echo '<div class="ush-issues">';
-            echo '<h3>' . __('Issues Found', 'unified-site-health-dashboard') . '</h3>';
-            foreach ($issues as $issue) {
-                $this->render_issue_card($issue);
-            }
-            echo '</div>';
-        }
+        // No output here. Issues will be loaded in modal via AJAX only.
     }
     
     /**
@@ -709,13 +700,11 @@ class USH_Dashboard {
         $broken_links = $data['data']['broken_links'] ?? array();
         
         ?>
-        <div class="ush-section ush-seo">
+        <div class="ush-section ush-seo ush-tile-modal-trigger" data-section="seo" tabindex="0" role="button" aria-pressed="false">
             <h2><?php _e('SEO', 'unified-site-health-dashboard'); ?></h2>
             <div class="ush-score-circle ush-score-<?php echo $this->get_score_class($score); ?>">
                 <span class="ush-score-value"><?php echo $score; ?>%</span>
             </div>
-            <p><a href="#" class="button button-secondary ush-open-issues-modal" data-section="seo"><?php _e('View issues', 'unified-site-health-dashboard'); ?></a></p>
-            
             <div class="ush-metrics">
                 <div class="ush-metric">
                     <span class="ush-metric-label"><?php _e('Meta Tags:', 'unified-site-health-dashboard'); ?></span>
@@ -749,13 +738,11 @@ class USH_Dashboard {
         $ssl = $data['data']['ssl'] ?? array();
         
         ?>
-        <div class="ush-section ush-security">
+        <div class="ush-section ush-security ush-tile-modal-trigger" data-section="security" tabindex="0" role="button" aria-pressed="false">
             <h2><?php _e('Security', 'unified-site-health-dashboard'); ?></h2>
             <div class="ush-score-circle ush-score-<?php echo $this->get_score_class($score); ?>">
                 <span class="ush-score-value"><?php echo $score; ?>%</span>
             </div>
-            <p><a href="#" class="button button-secondary ush-open-issues-modal" data-section="security"><?php _e('View issues', 'unified-site-health-dashboard'); ?></a></p>
-            
             <div class="ush-metrics">
                 <div class="ush-metric">
                     <span class="ush-metric-label"><?php _e('WordPress:', 'unified-site-health-dashboard'); ?></span>
@@ -788,13 +775,11 @@ class USH_Dashboard {
         $heading_structure = $data['data']['heading_structure'] ?? array();
         
         ?>
-        <div class="ush-section ush-accessibility">
+        <div class="ush-section ush-accessibility ush-tile-modal-trigger" data-section="accessibility" tabindex="0" role="button" aria-pressed="false">
             <h2><?php _e('Accessibility', 'unified-site-health-dashboard'); ?></h2>
             <div class="ush-score-circle ush-score-<?php echo $this->get_score_class($score); ?>">
                 <span class="ush-score-value"><?php echo $score; ?>%</span>
             </div>
-            <p><a href="#" class="button button-secondary ush-open-issues-modal" data-section="accessibility"><?php _e('View issues', 'unified-site-health-dashboard'); ?></a></p>
-            
             <div class="ush-metrics">
                 <div class="ush-metric">
                     <span class="ush-metric-label"><?php _e('Alt Text:', 'unified-site-health-dashboard'); ?></span>
@@ -823,13 +808,11 @@ class USH_Dashboard {
         $broken_links = $data['data']['broken_internal_links'] ?? array();
         
         ?>
-        <div class="ush-section ush-content-decay">
+        <div class="ush-section ush-content-decay ush-tile-modal-trigger" data-section="content_decay" tabindex="0" role="button" aria-pressed="false">
             <h2><?php _e('Content Decay', 'unified-site-health-dashboard'); ?></h2>
             <div class="ush-score-circle ush-score-<?php echo $this->get_score_class($score); ?>">
                 <span class="ush-score-value"><?php echo $score; ?>%</span>
             </div>
-            <p><a href="#" class="button button-secondary ush-open-issues-modal" data-section="content_decay"><?php _e('View issues', 'unified-site-health-dashboard'); ?></a></p>
-            
             <div class="ush-metrics">
                 <div class="ush-metric">
                     <span class="ush-metric-label"><?php _e('Old Posts:', 'unified-site-health-dashboard'); ?></span>
@@ -859,13 +842,11 @@ class USH_Dashboard {
         $ssl_certificate = $data['data']['ssl_certificate'] ?? array();
         
         ?>
-        <div class="ush-section ush-host-health">
+        <div class="ush-section ush-host-health ush-tile-modal-trigger" data-section="host_health" tabindex="0" role="button" aria-pressed="false">
             <h2><?php _e('Host Health', 'unified-site-health-dashboard'); ?></h2>
             <div class="ush-score-circle ush-score-<?php echo $this->get_score_class($score); ?>">
                 <span class="ush-score-value"><?php echo $score; ?>%</span>
             </div>
-            <p><a href="#" class="button button-secondary ush-open-issues-modal" data-section="host_health"><?php _e('View issues', 'unified-site-health-dashboard'); ?></a></p>
-            
             <div class="ush-metrics">
                 <div class="ush-metric">
                     <span class="ush-metric-label"><?php _e('PHP Version:', 'unified-site-health-dashboard'); ?></span>
