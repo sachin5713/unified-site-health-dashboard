@@ -329,10 +329,10 @@ jQuery(document).ready(function($) {
      */
     $('.ush-section').hover(
         function() {
-            $(this).css('transform', 'translateY(-2px)');
+            // $(this).css('transform', 'translateY(-2px)');
         },
         function() {
-            $(this).css('transform', 'translateY(0)');
+            // $(this).css('transform', 'translateY(0)');
         }
     );
     
