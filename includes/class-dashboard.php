@@ -960,9 +960,7 @@ class USH_Dashboard {
         ?>
         <div class="ush-scan-history">
             <h2><?php _e('Scan History', 'unified-site-health-dashboard'); ?></h2>
-            <div class="ush-scan-history-filters" style="margin-bottom:10px;">
-                <input type="text" id="ush-scan-history-date-filter" placeholder="<?php esc_attr_e('Filter by date', 'unified-site-health-dashboard'); ?>" autocomplete="off" />
-            </div>
+            
             <table id="ush-scan-history-table" class="ush-scan-history-table widefat fixed striped display">
                 <thead>
                     <tr>
@@ -1006,7 +1004,7 @@ class USH_Dashboard {
                     <?php endforeach; ?>
                 </tbody>
             </table>
-            <p class="description"><?php _e('You can filter, search, and sort the scan history. Use the trash icon to remove a scan record.', 'unified-site-health-dashboard'); ?></p>
+            <!-- <p class="description"><?php _e('You can filter, search, and sort the scan history. Use the trash icon to remove a scan record.', 'unified-site-health-dashboard'); ?></p> -->
         </div>
         <?php
     }

@@ -18,8 +18,12 @@
 }
 #ush-scan-history-table tbody td {
   vertical-align: middle;
-  padding: 10px 8px;
+  /* padding: 10px 8px; */
   border-bottom: 1px solid #f1f3f6;
+  /* text-align: center; */
+}
+div#ush-scan-history-table_wrapper{
+    padding: 15px;
 }
 #ush-scan-history-table .dashicons-trash {
   color: #b32d2e;

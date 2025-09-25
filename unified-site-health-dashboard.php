@@ -175,10 +175,10 @@ class UnifiedSiteHealthDashboard {
         // Enqueue DataTables only on scan history page
         $is_scan_history = isset($_GET['page']) && $_GET['page'] === 'site-health-scan-history';
         if ($is_scan_history) {
-            wp_enqueue_style('datatables', 'https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css', array(), '1.13.7');
+            wp_enqueue_style('datatables', '//cdn.datatables.net/2.3.4/css/dataTables.dataTables.min.css', array(), '1.13.7');
             wp_enqueue_style('ush-scan-history', USH_PLUGIN_URL . 'assets/css/scan-history.css', array('datatables'), USH_PLUGIN_VERSION);
             wp_enqueue_style('jquery-ui-datepicker', 'https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css', array(), '1.13.2');
-            wp_enqueue_script('datatables', 'https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js', array('jquery'), '1.13.7', true);
+            wp_enqueue_script('datatables', '//cdn.datatables.net/2.3.4/js/dataTables.min.js', array('jquery'), '1.13.7', true);
             wp_enqueue_script('jquery-ui-datepicker', 'https://code.jquery.com/ui/1.13.2/jquery-ui.min.js', array('jquery'), '1.13.2', true);
             wp_enqueue_script('ush-scan-history', USH_PLUGIN_URL . 'assets/js/scan-history.js', array('jquery', 'datatables', 'jquery-ui-datepicker'), USH_PLUGIN_VERSION, true);
             wp_localize_script('ush-scan-history', 'ush_scan_history', array(

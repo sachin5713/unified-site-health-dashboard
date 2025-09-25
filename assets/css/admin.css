@@ -769,7 +769,7 @@
 
 .ush-scan-score {
     display: inline-block;
-    padding: 0 8px;
+    /* padding: 0 8px; */
     border-radius: 12px;
     font-size: 12px;
     font-weight: 500;

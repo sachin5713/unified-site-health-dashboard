@@ -40,7 +40,7 @@ jQuery(document).ready(function($) {
         
         // Auto-refresh every 5 minutes
         setInterval(function() {
-            updateLastScanTime();
+            // updateLastScanTime();
         }, 300000); // 5 minutes
 
         // Page-wise: post type select submits filter
