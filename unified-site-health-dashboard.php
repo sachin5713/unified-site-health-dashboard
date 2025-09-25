@@ -30,6 +30,20 @@ define('USH_PLUGIN_VERSION', '1.0.0');
  * Main plugin class
  */
 class UnifiedSiteHealthDashboard {
+    /**
+     * Scan History page callback
+     */
+    public function scan_history_page() {
+        echo '<div class="wrap">';
+        echo '<h1>' . esc_html__('Scan History', 'unified-site-health-dashboard') . '</h1>';
+        if (class_exists('USH_Dashboard')) {
+            $dashboard = new USH_Dashboard();
+            $dashboard->render_scan_history();
+        } else {
+            echo '<p>' . esc_html__('Scan history is unavailable.', 'unified-site-health-dashboard') . '</p>';
+        }
+        echo '</div>';
+    }
     
     /**
      * Single instance of the plugin
@@ -110,6 +124,7 @@ class UnifiedSiteHealthDashboard {
      * Add admin menu
      */
     public function add_admin_menu() {
+
         // Detailed Report main menu
         add_menu_page(
             __('Site Health Report', 'unified-site-health-dashboard'),
@@ -129,6 +144,16 @@ class UnifiedSiteHealthDashboard {
             'manage_options',
             'site-health-page-report',
             array($this, 'page_wise_report_page')
+        );
+
+        // Scan History top-level submenu
+        add_submenu_page(
+            'site-health-detailed-report',
+            __('Scan History', 'unified-site-health-dashboard'),
+            __('Scan History', 'unified-site-health-dashboard'),
+            'manage_options',
+            'site-health-scan-history',
+            array($this, 'scan_history_page')
         );
         
         // Settings submenu
@@ -151,12 +176,14 @@ class UnifiedSiteHealthDashboard {
             'site-health-detailed-report',
             'site-health-page-report',
             'site-health-settings',
+            'site-health-scan-history',
         );
         $is_plugin_page = isset($_GET['page']) && in_array($_GET['page'], $plugin_pages);
         if ($hook === 'index.php' || $is_plugin_page || in_array($hook, array(
             'toplevel_page_site-health-detailed-report',
             'site-health-detailed-report_page_site-health-page-report',
-            'site-health-detailed-report_page_site-health-settings'
+            'site-health-detailed-report_page_site-health-settings',
+            'site-health-detailed-report_page_site-health-scan-history'
         ))) {
             wp_enqueue_style(
                 'ush-admin-style',

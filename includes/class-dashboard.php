@@ -44,9 +44,6 @@ class USH_Dashboard {
             </div>
             
             <?php $this->render_forecasting_section($forecasting_data); ?>
-            
-            <?php $this->render_scan_history(); ?>
-            
             <div class="ush-actions">
                 <button type="button" class="button button-primary" id="ush-rescan-btn">
                     <?php _e('Run New Scan', 'unified-site-health-dashboard'); ?>
@@ -304,12 +301,12 @@ class USH_Dashboard {
      */
     private function render_page_overview_scores($page_report) {
         $scores = array(
-            'performance' => $page_report['performance'],
-            'seo' => $page_report['seo'],
-            'security' => $page_report['security'],
-            'accessibility' => $page_report['accessibility'],
-            'content_decay' => $page_report['content_decay'],
-            'host_health' => $page_report['host_health']
+            'performance' => isset($page_report['performance']) && is_numeric($page_report['performance']) ? $page_report['performance'] : 0,
+            'seo' => isset($page_report['seo']) && is_numeric($page_report['seo']) ? $page_report['seo'] : 0,
+            'security' => isset($page_report['security']) && is_numeric($page_report['security']) ? $page_report['security'] : 0,
+            'accessibility' => isset($page_report['accessibility']) && is_numeric($page_report['accessibility']) ? $page_report['accessibility'] : 0,
+            'content_decay' => isset($page_report['content_decay']) && is_numeric($page_report['content_decay']) ? $page_report['content_decay'] : 0,
+            'host_health' => isset($page_report['host_health']) && is_numeric($page_report['host_health']) ? $page_report['host_health'] : 0
         );
         
         ?>
@@ -954,7 +951,7 @@ class USH_Dashboard {
     /**
      * Render scan history table
      */
-    private function render_scan_history() {
+    public function render_scan_history() {
         $scan_history = $this->get_scan_history();
         
         if (empty($scan_history)) {
