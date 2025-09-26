@@ -88,7 +88,7 @@ class USH_Database {
                 'audit_description' => $data['audit_description'],
                 'audit_element' => $data['audit_element'],
                 'severity' => $data['severity'],
-                'scan_date' => current_time('mysql')
+                'scan_date' => isset($data['scan_date']) && $data['scan_date'] ? $data['scan_date'] : current_time('mysql')
             ),
             array(
                 '%d',

@@ -239,13 +239,13 @@ class USH_Dashboard {
                                 <h3><?php echo $category; ?></h3>
                             </div>
                             <div class="ush-tile-score">
-                                <div class="ush-score-number"><?php echo $host_score; ?>%</div>
+                                <div class="ush-score-number"><?php echo is_numeric($host_score) ? $host_score . '%' : '—'; ?></div>
                                 <div class="ush-score-label"><?php _e('Score', 'unified-site-health-dashboard'); ?></div>
                             </div>
                             <div class="ush-tile-details">
                                 <div class="ush-detail-item">
                                     <span><?php _e('Details:', 'unified-site-health-dashboard'); ?></span>
-                                    <span><?php echo $host_score; ?>%</span>
+                                    <span><?php echo is_numeric($host_score) ? $host_score . '%' : '—'; ?></span>
                                 </div>
                             </div>
                         </div>
@@ -263,17 +263,17 @@ class USH_Dashboard {
                                 <h3><?php echo $category; ?></h3>
                             </div>
                             <div class="ush-tile-score">
-                                <div class="ush-score-number"><?php echo $overall_score; ?>%</div>
+                                <div class="ush-score-number"><?php echo is_numeric($overall_score) ? $overall_score . '%' : '—'; ?></div>
                                 <div class="ush-score-label"><?php _e('Overall Score', 'unified-site-health-dashboard'); ?></div>
                             </div>
                             <div class="ush-tile-details">
                                 <div class="ush-detail-item">
                                     <span><?php _e('Mobile:', 'unified-site-health-dashboard'); ?></span>
-                                    <span><?php echo $mobile_score; ?>%</span>
+                                    <span><?php echo is_numeric($mobile_score) ? $mobile_score . '%' : '—'; ?></span>
                                 </div>
                                 <div class="ush-detail-item">
                                     <span><?php _e('Desktop:', 'unified-site-health-dashboard'); ?></span>
-                                    <span><?php echo $desktop_score; ?>%</span>
+                                    <span><?php echo is_numeric($desktop_score) ? $desktop_score . '%' : '—'; ?></span>
                                 </div>
                             </div>
                         </div>

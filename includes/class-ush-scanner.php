@@ -30,6 +30,11 @@ class USH_Scanner {
      * Scan progress option name
      */
     private $progress_option = 'ush_scan_progress';
+    /**
+     * Run-level scan timestamp (mysql datetime)
+     * @var string
+     */
+    private $scan_run_date = null;
     
     /**
      * Constructor
@@ -63,6 +68,9 @@ class USH_Scanner {
         
         // Clear any existing progress and initialize new scan
         $this->clear_scan_progress();
+
+    // Set a run-level scan timestamp so all DB rows from this run share the same scan_date
+    $this->scan_run_date = current_time('mysql');
 
         // Define categories order and initial states
         $categories = array('Performance', 'SEO', 'Accessibility', 'Security', 'Host Health');
@@ -435,7 +443,24 @@ class USH_Scanner {
 
             $has_score = array_key_exists('score', $audit_data) && $audit_data['score'] !== null;
             $has_description = !empty($audit_data['description']);
-            $has_items = isset($audit_data['details']['items']) && !empty($audit_data['details']['items']);
+
+            // Lighthouse accessibility audits sometimes put affected nodes in different keys
+            // e.g. details.items or details.nodes (and other detail shapes). Treat any non-empty
+            // details object as a useful payload so we capture accessibility findings.
+            $has_items = false;
+            if (isset($audit_data['details']) && !empty($audit_data['details'])) {
+                if (is_array($audit_data['details'])) {
+                    if (!empty($audit_data['details']['items']) || !empty($audit_data['details']['nodes'])) {
+                        $has_items = true;
+                    } else {
+                        // Some audits provide other detail structures (tables, summary strings);
+                        // consider those meaningful as well.
+                        $has_items = true;
+                    }
+                } else {
+                    $has_items = true;
+                }
+            }
 
             if (!$has_score && !$has_description && !$has_items) {
                 // Nothing useful to store
@@ -464,6 +489,10 @@ class USH_Scanner {
                 'severity' => $severity
             );
             
+            // Include run-level scan_date if present
+            if ($this->scan_run_date) {
+                $result_data['scan_date'] = $this->scan_run_date;
+            }
             $this->database->store_scan_result($result_data);
         }
 
@@ -510,6 +539,9 @@ class USH_Scanner {
                     'severity' => $this->get_audit_severity($score)
                 );
 
+                if ($this->scan_run_date) {
+                    $result['scan_date'] = $this->scan_run_date;
+                }
                 $this->database->store_scan_result($result);
 
                 // mark category as completed
@@ -615,7 +647,7 @@ class USH_Scanner {
             'severity' => defined('FS_METHOD') && FS_METHOD !== 'direct' ? 'warning' : 'good'
         );
         foreach ($security_items as $item) {
-            $this->database->store_scan_result(array(
+            $row = array(
                 'page_id' => $page['id'],
                 'page_url' => $page['url'],
                 'scan_type' => 'desktop',
@@ -625,7 +657,9 @@ class USH_Scanner {
                 'audit_description' => $item['description'],
                 'audit_element' => $item['element'],
                 'severity' => $item['severity']
-            ));
+            );
+            if ($this->scan_run_date) { $row['scan_date'] = $this->scan_run_date; }
+            $this->database->store_scan_result($row);
         }
 
         // Host Health checks
@@ -647,7 +681,7 @@ class USH_Scanner {
             'severity' => 'good'
         );
         foreach ($host_items as $item) {
-            $this->database->store_scan_result(array(
+            $row = array(
                 'page_id' => $page['id'],
                 'page_url' => $page['url'],
                 'scan_type' => 'desktop',
@@ -657,8 +691,11 @@ class USH_Scanner {
                 'audit_description' => $item['description'],
                 'audit_element' => $item['element'],
                 'severity' => $item['severity']
-            ));
+            );
+            if ($this->scan_run_date) { $row['scan_date'] = $this->scan_run_date; }
+            $this->database->store_scan_result($row);
         }
+
 
         // Mark Host Health completed
         $progress = get_option($this->progress_option, array());
@@ -700,22 +737,46 @@ class USH_Scanner {
      * @return string Affected element
      */
     private function extract_affected_element($audit_data) {
-        if (isset($audit_data['details']['items'])) {
-            $items = $audit_data['details']['items'];
-            if (is_array($items) && !empty($items)) {
-                $first_item = $items[0];
+        // Try common patterns: details.items[*].url | details.items[*].node.selector | details.nodes[*].selector
+        if (isset($audit_data['details']) && is_array($audit_data['details'])) {
+            // items array (some audits)
+            if (!empty($audit_data['details']['items']) && is_array($audit_data['details']['items'])) {
+                $first_item = $audit_data['details']['items'][0];
                 if (isset($first_item['url'])) {
                     return $first_item['url'];
-                } elseif (isset($first_item['node'])) {
+                }
+                if (isset($first_item['node']) && isset($first_item['node']['selector'])) {
                     return $first_item['node']['selector'];
+                }
+                if (isset($first_item['selector'])) {
+                    return $first_item['selector'];
+                }
+            }
+
+            // nodes array (accessibility audits often use 'nodes')
+            if (!empty($audit_data['details']['nodes']) && is_array($audit_data['details']['nodes'])) {
+                $first_node = $audit_data['details']['nodes'][0];
+                if (isset($first_node['selector'])) {
+                    return $first_node['selector'];
+                }
+                if (isset($first_node['path'])) {
+                    return $first_node['path'];
+                }
+            }
+
+            // Some audits include a single string or other numeric details; try to provide a concise summary
+            if (isset($audit_data['details']['overallSavingsMs'])) {
+                return 'Overall savings: ' . $audit_data['details']['overallSavingsMs'] . 'ms';
+            }
+
+            // fallback: if details contains a debug or summary field, return it as a short string
+            foreach (array('summary', 'failureSummary', 'explanation') as $k) {
+                if (!empty($audit_data['details'][$k])) {
+                    return is_string($audit_data['details'][$k]) ? $audit_data['details'][$k] : json_encode($audit_data['details'][$k]);
                 }
             }
         }
-        
-        if (isset($audit_data['details']['overallSavingsMs'])) {
-            return 'Overall savings: ' . $audit_data['details']['overallSavingsMs'] . 'ms';
-        }
-        
+
         return '';
     }
     

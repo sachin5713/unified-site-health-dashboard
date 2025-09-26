@@ -82,8 +82,9 @@
             // Show progress bar immediately with connection test message
             USHDashboard.showProgressBar();
             USHDashboard.showConnectionTest();
-            // Start polling to reflect progress updates
-            USHDashboard.startProgressPolling();
+            // Start polling to reflect progress updates. Force start because the backend may not have set the
+            // progress option yet when the start_scan AJAX call returns.
+            USHDashboard.startProgressPolling(true);
             
             // Make AJAX request
             $.ajax({
