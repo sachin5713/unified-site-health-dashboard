@@ -1,185 +1,123 @@
 # Unified Site Health + Forecast Dashboard
 
-A comprehensive WordPress plugin that scans your website for performance, SEO, security, accessibility, and content issues, then displays results in a unified dashboard with forecasting capabilities.
+A comprehensive WordPress plugin that scans, monitors, and forecasts site performance, SEO, accessibility, and security issues using Google PageSpeed Insights API.
 
 ## Features
 
-### 🔍 Comprehensive Scanning
-- **Performance**: Core Web Vitals (LCP, FID, CLS), TTFB, and server metrics
-- **SEO**: Meta tags, alt text, broken links, heading structure, sitemap
-- **Security**: WordPress version, plugins, themes, file permissions, SSL
-- **Accessibility**: Alt text, heading structure, color contrast, keyboard navigation
-- **Content Decay**: Old posts, broken internal links, outdated content
-- **Host Health**: PHP version, SSL expiry, disk space, server response
+### Site Health Overview Module
 
-### 📊 Unified Dashboard
-- Color-coded score indicators (red/yellow/green)
-- Real-time alerts and warnings
-- Detailed metrics for each category
-- Export functionality for reports
-
-### 🔮 Forecasting
-- Predictive analytics for performance trends
-- 30-day projections based on current data
-- Actionable recommendations
-
-### ⚙️ Configuration
-- Google PageSpeed Insights API integration
-- Customizable scan frequency
-- Email alerts for critical issues
-- Configurable alert thresholds
+- **Real-time PageSpeed Insights Integration**: Scans your website using Google's PageSpeed Insights API for both mobile and desktop
+- **Comprehensive Audit Analysis**: Extracts and stores all audit results from lighthouseResult.audits
+- **Custom Database Storage**: Stores detailed audit data in a custom database table
+- **Interactive Dashboard**: Beautiful tiles showing category scores with modal popups for detailed analysis
+- **Progress Tracking**: Real-time progress bar during scans with page-by-page status updates
+- **Category-based Organization**: Organizes audits into Performance, SEO, Accessibility, Security, Content, and Host Health categories
 
 ## Installation
 
-1. **Upload the plugin files** to your WordPress plugins directory:
-   ```
-   wp-content/plugins/unified-site-health-dashboard/
-   ```
+1. Upload the plugin files to `/wp-content/plugins/unified-site-health-dashboard/`
+2. Activate the plugin through the 'Plugins' screen in WordPress
+3. Go to 'Site Health' > 'Settings' to configure your Google PageSpeed Insights API key
+4. Start your first scan from the dashboard
 
-2. **Activate the plugin** through the 'Plugins' menu in WordPress
+## Configuration
 
-3. **Configure the plugin**:
-   - Go to "Site Health Forecast" → "Settings"
-   - Add your Google PageSpeed Insights API key (optional but recommended)
-   - Configure scan frequency and alert settings
+### Google PageSpeed Insights API Key
 
-## Getting Your Google PageSpeed Insights API Key
+1. Visit [Google PageSpeed Insights API](https://developers.google.com/speed/docs/insights/v5/get-started)
+2. Get your API key
+3. Enter it in the plugin settings
 
-1. Visit the [Google PageSpeed Insights API documentation](https://developers.google.com/speed/docs/insights/v5/get-started)
-2. Follow the instructions to create a Google Cloud project
-3. Enable the PageSpeed Insights API
-4. Create an API key
-5. Add the API key in the plugin settings
+### Settings
+
+- **API Key**: Your Google PageSpeed Insights API key
+- **Automatic Scanning**: Enable/disable automatic scans
+- **Scan Interval**: Choose between daily, weekly, or monthly scans
+- **Pages to Scan**: Select which pages to include in scans
+
+## Database Schema
+
+The plugin creates a custom table `wp_ush_scan_results` with the following structure:
+
+- `id`: Auto-increment primary key
+- `page_id`: WordPress post/page ID
+- `page_url`: Full URL of the scanned page
+- `scan_type`: 'mobile' or 'desktop'
+- `audit_category`: Category (Performance, SEO, Accessibility, etc.)
+- `audit_name`: Name of the audit (e.g., LCP, CLS, FID)
+- `audit_score`: Score from the API
+- `audit_description`: Detailed description
+- `audit_element`: Affected resource (image URL, script, etc.)
+- `severity`: 'critical', 'warning', 'info', or 'good'
+- `scan_date`: Timestamp of the scan
 
 ## Usage
 
-### Dashboard Overview
-After activation, you'll find a new "Site Health Forecast" menu item in your WordPress admin sidebar. The dashboard displays:
+### Starting a Scan
 
-- **Overall Health Score**: Aggregated score across all categories
-- **Section Scores**: Individual scores for Performance, SEO, Security, etc.
-- **Alerts**: Critical issues that need immediate attention
-- **Predictions**: Forecasted performance trends
+1. Go to 'Site Health' in your WordPress admin
+2. Click 'Start New Scan' (ensure API key is configured)
+3. Monitor progress with the real-time progress bar
+4. View results in the category tiles
 
-### Running Scans
-- **Automatic**: Scans run automatically based on your configured frequency
-- **Manual**: Click "Run New Scan" button to scan immediately
-- **On Activation**: Initial scan runs automatically when plugin is activated
+### Viewing Results
+
+- **Dashboard Tiles**: Click any category tile to see detailed audit results
+- **Modal Popups**: Detailed tables showing all audit issues with severity levels
+- **Mobile vs Desktop**: Switch between mobile and desktop results in modals
+- **Severity Indicators**: Color-coded badges for critical, warning, info, and good issues
 
 ### Understanding Scores
-- **🟢 Green (80-100%)**: Excellent - no action needed
-- **🟡 Yellow (50-79%)**: Good - minor optimizations recommended
-- **🔴 Red (0-49%)**: Critical - immediate attention required
 
-### Exporting Reports
-Click the "Export Report" button to download a CSV file with all scan results for external analysis or record-keeping.
-
-## File Structure
-
-```
-unified-site-health-dashboard/
-├── unified-site-health-dashboard.php    # Main plugin file
-├── includes/                            # Scanner classes
-│   ├── class-performance-scanner.php
-│   ├── class-seo-scanner.php
-│   ├── class-security-scanner.php
-│   ├── class-accessibility-scanner.php
-│   ├── class-content-decay-scanner.php
-│   ├── class-host-health-scanner.php
-│   └── class-dashboard.php
-├── assets/                             # Frontend assets
-│   ├── css/
-│   │   └── admin.css
-│   └── js/
-│       └── admin.js
-└── README.md
-```
+- **90-100%**: Good (Green)
+- **50-89%**: Warning (Yellow)
+- **0-49%**: Critical (Red)
 
 ## Technical Details
 
-### Database Tables
-The plugin creates a custom table `wp_ush_scan_results` to store scan data:
-- `id`: Primary key
-- `scan_type`: Type of scan (performance, seo, etc.)
-- `scan_data`: JSON data with scan results
-- `scan_date`: Timestamp of the scan
+### Architecture
 
-### API Integration
-- **Google PageSpeed Insights API**: For real performance data
-- **WordPress Hooks**: For plugin/theme information
-- **Server Metrics**: PHP, disk space, memory usage
+- **Modular Design**: Separate classes for database, scanner, dashboard, and admin
+- **WordPress Standards**: Follows WordPress coding standards and best practices
+- **AJAX Integration**: Real-time updates without page refreshes
+- **Security**: Proper nonce verification and capability checks
+- **Performance**: Batch processing to avoid timeouts
 
-### Security
-- All AJAX requests are protected with nonces
-- User capability checks for admin functions
-- Sanitized input and escaped output
-- No direct file access
+### File Structure
 
-## Customization
-
-### Adding New Scanners
-1. Create a new scanner class in `includes/`
-2. Follow the naming convention: `class-{name}-scanner.php`
-3. Implement the `scan()` method
-4. Add the scanner to the main plugin file
-
-### Modifying Dashboard
-The dashboard is rendered by the `USH_Dashboard` class. You can:
-- Add new sections in `render_*_section()` methods
-- Modify styling in `assets/css/admin.css`
-- Add JavaScript functionality in `assets/js/admin.js`
-
-## Troubleshooting
-
-### Common Issues
-
-**"No scan data available"**
-- Ensure the plugin is properly activated
-- Check that database tables were created
-- Run a manual scan from the dashboard
-
-**PageSpeed API errors**
-- Verify your API key is correct
-- Check API quota limits
-- Ensure your site is publicly accessible
-
-**Performance issues during scans**
-- Increase PHP memory limit
-- Adjust scan frequency in settings
-- Consider running scans during off-peak hours
-
-### Debug Mode
-Enable WordPress debug mode to see detailed error messages:
-```php
-define('WP_DEBUG', true);
-define('WP_DEBUG_LOG', true);
+```
+unified-site-health-dashboard/
+├── unified-site-health-dashboard.php (Main plugin file)
+├── includes/
+│   ├── class-ush-database.php (Database operations)
+│   ├── class-ush-scanner.php (PageSpeed Insights API)
+│   ├── class-ush-dashboard.php (Dashboard display)
+│   └── class-ush-admin.php (Settings page)
+├── assets/
+│   ├── css/
+│   │   └── dashboard.css (Dashboard styles)
+│   └── js/
+│       └── dashboard.js (Dashboard JavaScript)
+└── README.md
 ```
 
 ## Requirements
 
-- **WordPress**: 5.0 or higher
-- **PHP**: 7.4 or higher
-- **MySQL**: 5.6 or higher
-- **Memory**: 128MB minimum (256MB recommended)
-
-## Changelog
-
-### Version 1.0.0
-- Initial release
-- Core Web Vitals scanning
-- SEO, Security, Accessibility, Content Decay, and Host Health scanning
-- Unified dashboard with forecasting
-- Export functionality
-- Settings page with API key configuration
+- WordPress 5.0 or higher
+- PHP 7.4 or higher
+- Google PageSpeed Insights API key
+- Internet connection for API calls
 
 ## Support
 
-For support, feature requests, or bug reports, please contact the plugin developer or create an issue in the plugin repository.
+For support and feature requests, please contact the plugin author.
 
 ## License
 
-This plugin is licensed under the GPL v2 or later.
+GPL v2 or later
 
----
+## Developer / Testing Notes
 
-**Note**: This is an MVP (Minimum Viable Product) version. Some features use mock data for demonstration purposes. Future versions will include real scanning capabilities for all modules.
+- This plugin uses a test URL by default in development: https://golhh.stagingwp.website. Update `get_test_pages()` in `includes/class-ush-scanner.php` to change the test pages used for development.
+- The dashboard will only poll the server for scan progress when a scan is started manually or when "Automatic Scanning" is enabled in the plugin settings. This prevents background progress checks from running continuously.
+- If an API or network error occurs during a category scan, errors are shown in the progress panel and the scanner continues with the next category/page.
